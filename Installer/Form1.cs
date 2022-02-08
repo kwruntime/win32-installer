@@ -88,9 +88,10 @@ namespace KwRuntime_Installer
 			{
 				return false;
 			}
-			using Process process = Process.GetCurrentProcess();
-			bool wow64Process;
-			return IsWow64Process(process.Handle, out wow64Process) && wow64Process;
+			using( Process process = Process.GetCurrentProcess()){
+				bool wow64Process;
+				return IsWow64Process(process.Handle, out wow64Process) && wow64Process;
+			}
 		}
 
 		[DllImport("kernel32.dll", SetLastError = true)]
@@ -164,12 +165,14 @@ namespace KwRuntime_Installer
 			{
 				foreach (object item in list)
 				{
-					using WebClient webClient3 = new WebClient();
 					Dictionary<string, object> dictionary4 = (Dictionary<string, object>)item;
 					string text9 = Path.Combine(text, (string)dictionary4["path"]);
-					SecureAppendLine(" - " + dictionary4["href"]);
-					webClient3.Headers.Add("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-					webClient3.DownloadFile((string)dictionary4["href"], text9);
+					using(WebClient webClient3 = new WebClient()){						
+						
+						SecureAppendLine(" - " + dictionary4["href"]);
+						webClient3.Headers.Add("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+						webClient3.DownloadFile((string)dictionary4["href"], text9);
+					}
 					if (dictionary4.ContainsKey("compression"))
 					{
 						if (!((string)dictionary4["compression"] == "tar+gz"))

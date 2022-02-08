@@ -9,8 +9,10 @@ namespace TarCompression
 	{
 		public static void ExtractTar(string filename, string outputDir)
 		{
-			using FileStream stream = File.OpenRead(filename);
-			ExtractTar(stream, outputDir);
+			using (FileStream stream = File.OpenRead(filename))
+			{
+				ExtractTar(stream, outputDir);
+			}
 		}
 
 		public static void ExtractTar(Stream stream, string outputDir)
@@ -19,14 +21,14 @@ namespace TarCompression
 			while (true)
 			{
 				stream.Read(array, 0, 100);
-				string text = Encoding.ASCII.GetString(array).Trim(new char[1]);
+				string text = Encoding.ASCII.GetString(array).Trim(default(char));
 				if (string.IsNullOrEmpty(text))
 				{
 					break;
 				}
 				stream.Seek(24L, SeekOrigin.Current);
 				stream.Read(array, 0, 12);
-				long num = Convert.ToInt64(Encoding.UTF8.GetString(array, 0, 12).Trim(new char[1]).Trim(), 8);
+				long num = Convert.ToInt64(Encoding.UTF8.GetString(array, 0, 12).Trim(default(char)).Trim(), 8);
 				stream.Seek(376L, SeekOrigin.Current);
 				string path = Path.Combine(outputDir, text);
 				if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -35,10 +37,12 @@ namespace TarCompression
 				}
 				if (!text.EndsWith("/"))
 				{
-					using FileStream fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write);
-					byte[] array2 = new byte[num];
-					stream.Read(array2, 0, array2.Length);
-					fileStream.Write(array2, 0, array2.Length);
+					using (FileStream fileStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write))
+					{
+						byte[] array2 = new byte[num];
+						stream.Read(array2, 0, array2.Length);
+						fileStream.Write(array2, 0, array2.Length);
+					}
 				}
 				long position = stream.Position;
 				long num2 = 512 - position % 512;
@@ -52,24 +56,30 @@ namespace TarCompression
 
 		public static void ExtractTarGz(string filename, string outputDir)
 		{
-			using FileStream stream = File.OpenRead(filename);
-			ExtractTarGz(stream, outputDir);
+			using (FileStream stream = File.OpenRead(filename))
+			{
+				ExtractTarGz(stream, outputDir);
+			}
 		}
 
 		public static void ExtractTarGz(Stream stream, string outputDir)
 		{
-			using GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress);
-			using MemoryStream memoryStream = new MemoryStream();
-			byte[] buffer = new byte[4096];
-			int num;
-			do
+			using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
 			{
-				num = gZipStream.Read(buffer, 0, 4096);
-				memoryStream.Write(buffer, 0, num);
+				using (MemoryStream memoryStream = new MemoryStream())
+				{
+					byte[] buffer = new byte[4096];
+					int num;
+					do
+					{
+						num = gZipStream.Read(buffer, 0, 4096);
+						memoryStream.Write(buffer, 0, num);
+					}
+					while (num == 4096);
+					memoryStream.Seek(0L, SeekOrigin.Begin);
+					ExtractTar(memoryStream, outputDir);
+				}
 			}
-			while (num == 4096);
-			memoryStream.Seek(0L, SeekOrigin.Begin);
-			ExtractTar(memoryStream, outputDir);
 		}
 	}
 }

@@ -46,7 +46,7 @@ namespace TinyJson
 				char c = json[i];
 				if (c == '"')
 				{
-					i = AppendUntilStringEnd(appendEscapeCharacter: true, i, json);
+					i = AppendUntilStringEnd(true, i, json);
 				}
 				else if (!char.IsWhiteSpace(c))
 				{
@@ -106,7 +106,7 @@ namespace TinyJson
 					num--;
 					break;
 				case '"':
-					i = AppendUntilStringEnd(appendEscapeCharacter: true, i, json);
+					i = AppendUntilStringEnd(true, i, json);
 					continue;
 				case ',':
 				case ':':
@@ -165,7 +165,8 @@ namespace TinyJson
 			}
 			if (type == typeof(decimal))
 			{
-				decimal.TryParse(json, NumberStyles.Float, CultureInfo.InvariantCulture, out var result2);
+				decimal result2;
+				decimal.TryParse(json, NumberStyles.Float, CultureInfo.InvariantCulture, out result2);
 				return result2;
 			}
 			if (json == "null")
@@ -180,7 +181,7 @@ namespace TinyJson
 				}
 				try
 				{
-					return Enum.Parse(type, json, ignoreCase: false);
+					return Enum.Parse(type, json, false);
 				}
 				catch
 				{
@@ -211,7 +212,7 @@ namespace TinyJson
 					return null;
 				}
 				List<string> list2 = Split(json);
-				IList list3 = (IList)type.GetConstructor(new Type[1] { typeof(int) })!.Invoke(new object[1] { list2.Count });
+				IList list3 = (IList)type.GetConstructor(new Type[1] { typeof(int) }).Invoke(new object[1] { list2.Count });
 				for (int k = 0; k < list2.Count; k++)
 				{
 					list3.Add(ParseValue(type2, list2[k]));
@@ -237,7 +238,7 @@ namespace TinyJson
 				{
 					return null;
 				}
-				IDictionary dictionary = (IDictionary)type.GetConstructor(new Type[1] { typeof(int) })!.Invoke(new object[1] { list4.Count / 2 });
+				IDictionary dictionary = (IDictionary)type.GetConstructor(new Type[1] { typeof(int) }).Invoke(new object[1] { list4.Count / 2 });
 				for (int l = 0; l < list4.Count; l += 2)
 				{
 					if (list4[l].Length > 2)
@@ -297,10 +298,12 @@ namespace TinyJson
 			{
 				if (json.Contains("."))
 				{
-					double.TryParse(json, NumberStyles.Float, CultureInfo.InvariantCulture, out var result);
+					double result;
+					double.TryParse(json, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
 					return result;
 				}
-				int.TryParse(json, out var result2);
+				int result2;
+				int.TryParse(json, out result2);
 				return result2;
 			}
 			if (json == "true")
@@ -319,14 +322,14 @@ namespace TinyJson
 			Dictionary<string, T> dictionary = new Dictionary<string, T>(StringComparer.OrdinalIgnoreCase);
 			foreach (T val in members)
 			{
-				if (val.IsDefined(typeof(IgnoreDataMemberAttribute), inherit: true))
+				if (val.IsDefined(typeof(IgnoreDataMemberAttribute), true))
 				{
 					continue;
 				}
 				string name = val.Name;
-				if (val.IsDefined(typeof(DataMemberAttribute), inherit: true))
+				if (val.IsDefined(typeof(DataMemberAttribute), true))
 				{
-					DataMemberAttribute dataMemberAttribute = (DataMemberAttribute)Attribute.GetCustomAttribute(val, typeof(DataMemberAttribute), inherit: true);
+					DataMemberAttribute dataMemberAttribute = (DataMemberAttribute)Attribute.GetCustomAttribute(val, typeof(DataMemberAttribute), true);
 					if (!string.IsNullOrEmpty(dataMemberAttribute.Name))
 					{
 						name = dataMemberAttribute.Name;
@@ -345,12 +348,14 @@ namespace TinyJson
 			{
 				return uninitializedObject;
 			}
-			if (!fieldInfoCache.TryGetValue(type, out var value))
+			Dictionary<string, FieldInfo> value;
+			if (!fieldInfoCache.TryGetValue(type, out value))
 			{
 				value = CreateMemberNameDictionary(type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));
 				fieldInfoCache.Add(type, value);
 			}
-			if (!propertyInfoCache.TryGetValue(type, out var value2))
+			Dictionary<string, PropertyInfo> value2;
+			if (!propertyInfoCache.TryGetValue(type, out value2))
 			{
 				value2 = CreateMemberNameDictionary(type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));
 				propertyInfoCache.Add(type, value2);
@@ -361,8 +366,9 @@ namespace TinyJson
 				{
 					string key = list[i].Substring(1, list[i].Length - 2);
 					string json2 = list[i + 1];
+					FieldInfo value3;
 					PropertyInfo value4;
-					if (value.TryGetValue(key, out var value3))
+					if (value.TryGetValue(key, out value3))
 					{
 						value3.SetValue(uninitializedObject, ParseValue(value3.FieldType, json2));
 					}
