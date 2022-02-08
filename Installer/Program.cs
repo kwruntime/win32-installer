@@ -10,7 +10,7 @@ namespace KwRuntime_Installer
 	internal static class Program
 	{
 
-
+		/*
 		private static int RunAsGuiForBat(string[] args){
 
 			string location = Assembly.GetExecutingAssembly().Location.ToLower();
@@ -58,19 +58,19 @@ namespace KwRuntime_Installer
 			process.WaitForExit();
 			return process.ExitCode;
 
-		}
+		}*/
 
 		[STAThread]
 		private static int Main(string[] args)
 		{
 			
-			string location = Assembly.GetExecutingAssembly().Location.ToLower();
+			/*string location = Assembly.GetExecutingAssembly().Location.ToLower();
 			if (location.EndsWith ("-gui.exe")) {
 				return RunAsGuiForBat (args);
-			}
+			}*/
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run((Form)(object)new Form1());
+			Application.Run(new Form1());
 			return 0;
 		}
 	}

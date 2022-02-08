@@ -107,9 +107,9 @@ namespace KwRuntime_Installer
 			ServicePointManager.Expect100Continue = true;
 			try
 			{
-				ServicePointManager.SecurityProtocol = (SecurityProtocolType)48 | (SecurityProtocolType)192 | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
+				ServicePointManager.SecurityProtocol = (SecurityProtocolType)768 | (SecurityProtocolType)3072;
             }
-            catch (Exception e)
+            catch (Exception)
             {
 				throw new Exception("Failed download files. You need install .NET Framework 4.5 or superior.");
             }
