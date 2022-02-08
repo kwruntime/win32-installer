@@ -299,7 +299,7 @@ namespace KwRuntime_Installer
 		{
 			
 			//base.Icon = Icon.ExtractAssociatedIcon(Assembly.GetCallingAssembly().Location);
-			Icon = Icon.FromHandle(Installer.Resources.pictureBox1_Image.GetHicon());
+			Icon = Icon.FromHandle(Installer.Resource1.pictureBox1_Image.GetHicon());
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.label1 = new System.Windows.Forms.Label();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -323,7 +323,7 @@ namespace KwRuntime_Installer
 			this.label1.TabIndex = 1;
 			this.label1.Text = "KwRuntime";
 			this.pictureBox1.ErrorImage = null;
-			this.pictureBox1.Image = Installer.Resources.pictureBox1_Image;
+			this.pictureBox1.Image = Installer.Resource1.pictureBox1_Image;
 			this.pictureBox1.Location = new System.Drawing.Point(78, 26);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(129, 131);
