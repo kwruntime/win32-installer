@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -104,7 +105,14 @@ namespace KwRuntime_Installer
 		private void Download()
 		{
 			ServicePointManager.Expect100Continue = true;
-			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+			try
+			{
+				ServicePointManager.SecurityProtocol = (SecurityProtocolType)48 | (SecurityProtocolType)192 | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
+            }
+            catch (Exception e)
+            {
+				throw new Exception("Failed download files. You need install .NET Framework 4.5 or superior.");
+            }
 			string text = Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME"), "KwRuntime");
 			if (!Directory.Exists(text))
 			{
@@ -140,7 +148,31 @@ namespace KwRuntime_Installer
 			{
 				text5 = "x86";
 			}
-			Dictionary<string, object> dictionary3 = (Dictionary<string, object>)((List<object>)((Dictionary<string, object>)dictionary2["node"])[text5])[0];
+			List<object> nodeVersions = (List<object>)((Dictionary<string, object>)dictionary2["node"])[text5];
+			var iswin8OrSuperior = (Environment.OSVersion.Platform == PlatformID.Win32NT) &&
+			             ((Environment.OSVersion.Version.Major > 6)
+			              || ((Environment.OSVersion.Version.Major == 6) && (Environment.OSVersion.Version.Minor > 1)));
+
+			Dictionary<string, object> dictionary3 = null;
+			if (iswin8OrSuperior)
+			{
+				dictionary3 = (Dictionary<string, object>)nodeVersions[0];
+			}
+			else
+			{
+				// find the windows7 version
+				for (var i = 0; i < nodeVersions.Count; i++)
+				{
+					object type = null;
+					Dictionary<string, object> dic = (Dictionary<string, object>) nodeVersions[i];
+					if (!dic.TryGetValue("os", out type)) continue;
+					if (type.ToString() != "<windows8") continue;
+					dictionary3 = dic;
+					break;
+				}
+			}
+
+			if (dictionary3 == null) throw new Exception("Windows 8 or higher is required.");
 			string text6 = (string)dictionary3["version"];
 			string text7 = (string)dictionary3["href"];
 			SecureAppendLine("URL:" + text7);
@@ -212,6 +244,7 @@ namespace KwRuntime_Installer
 			{
 				StartInfo = 
 				{
+					EnvironmentVariables = { {"NODE_SKIP_PLATFORM_CHECK", "1"} },
 					UseShellExecute = false,
 					RedirectStandardError = true,
 					RedirectStandardOutput = true,
@@ -297,7 +330,19 @@ namespace KwRuntime_Installer
 
 		private void InitializeComponent()
 		{
-			
+
+			try
+			{
+				ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Installation failed. .NET Framework 4.5 or superior is required.");
+				System.Environment.Exit(0);
+				return;
+			}
+
+
 			//base.Icon = Icon.ExtractAssociatedIcon(Assembly.GetCallingAssembly().Location);
 			Icon = Icon.FromHandle(Installer.Resource1.pictureBox1_Image.GetHicon());
 			this.panel1 = new System.Windows.Forms.Panel();
@@ -306,7 +351,7 @@ namespace KwRuntime_Installer
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.panel1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)this.pictureBox1).BeginInit();
-			base.SuspendLayout();
+			this.SuspendLayout();
 			this.panel1.BackColor = System.Drawing.Color.White;
 			this.panel1.Controls.Add(this.label1);
 			this.panel1.Controls.Add(this.pictureBox1);
@@ -339,22 +384,22 @@ namespace KwRuntime_Installer
 			this.textBox1.Name = "textBox1";
 			this.textBox1.Size = new System.Drawing.Size(484, 127);
 			this.textBox1.TabIndex = 1;
-			base.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
-			base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6f, 13f);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.WhiteSmoke;
-			base.ClientSize = new System.Drawing.Size(515, 334);
-			base.Controls.Add(this.textBox1);
-			base.Controls.Add(this.panel1);
-			base.MaximizeBox = false;
-			base.MinimizeBox = false;
-			base.Name = "Form1";
-			base.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.ClientSize = new System.Drawing.Size(515, 334);
+			this.Controls.Add(this.textBox1);
+			this.Controls.Add(this.panel1);
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
+			this.Name = "Form1";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "KwRuntime Installer";
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)this.pictureBox1).EndInit();
-			base.ResumeLayout(false);
-			base.PerformLayout();
+			this.ResumeLayout(false);
+			this.PerformLayout();
 		}
 	}
 }
