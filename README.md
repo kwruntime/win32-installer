@@ -1,8 +1,8 @@
 # Windows Installer
 
 Windows (32/64 bits) installer for [kwruntime/core](https://github.com/kwruntime/core).
-The installer is created with C# - .NET Framework 4.5
-The installer automatically download and install the latest version.
+The installer is created with C# - .NET Framework 4.5.
+The installer automatically download and install latest version.
 
 ## It's secure?
 
